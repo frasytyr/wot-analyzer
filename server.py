@@ -68,8 +68,8 @@ def parse_wotreplay(file_bytes):
         raise ValueError("Файл слишком маленький")
 
     magic = struct.unpack_from('<I', file_bytes, 0)[0]
-    if magic != 0x12343212:
-        raise ValueError(f"Неверный magic: 0x{magic:08X} (ожидался 0x12343212)")
+    if magic != 0x11343212:
+        raise ValueError(f"Неверный magic: 0x{magic:08X} (ожидался 0x11343212)")
 
     block_count = struct.unpack_from('<I', file_bytes, 4)[0]
     if block_count < 1 or block_count > 10:
