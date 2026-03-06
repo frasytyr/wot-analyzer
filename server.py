@@ -172,6 +172,9 @@ def extract_battle(b0, b1, filename):
 
 
 # ─── API ──────────────────────────────────────────────────────────────────────
+@app.route('/ping')
+def ping():
+    return 'ok', 200
 @app.route('/')
 def index():
     return send_from_directory('static', 'index.html')
