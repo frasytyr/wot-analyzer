@@ -109,11 +109,23 @@ def extract_battle(b0, b1, filename):
             result['datetime'] = f"{m[3]}.{m[2]}.{m[1]} {m[4]}:{m[5]}"
 
     # ── Ростер игроков из b0['vehicles'] ─────────────────────────────────────
-    roster = {}   # vid → {name, tank, team}
+ # Сначала определяем команду главного игрока
+    player_name = b0.get('playerName', '')
+    player_team = None
+    if b1 and isinstance(b1, list) and len(b1) >= 1:
+        for pid, pdata in b1[0].get('players', {}).items():
+            if pdata.get('name') == player_name:
+                player_team = pdata.get('team')
+                break
+
+    # Берём только союзников (та же команда)
+    roster = {}
     for vid, vdata in b0.get('vehicles', {}).items():
+        team = vdata.get('team')
+        if player_team is not None and team != player_team:
+            continue  # пропускаем врагов
         name = vdata.get('fakeName') or vdata.get('name') or f'Player_{vid}'
         tank = clean_tank_name(vdata.get('vehicleType', ''))
-        team = vdata.get('team')
         roster[str(vid)] = {'nick': name, 'tank': tank, 'team': team,
                              'dmg': 0, 'assist': 0, 'kills': 0}
 
