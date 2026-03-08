@@ -308,14 +308,21 @@ uploadZone.addEventListener('click', e => { if (e.target.tagName !== 'BUTTON') f
 fileInput.addEventListener('change', () => { handleFiles(fileInput.files); fileInput.value=''; });
 
 function handleFiles(files) {
-  [...files].forEach(file => {
-    if (loadedFiles.has(file.name)) return;
+  const newFiles = [...files].filter(f => !loadedFiles.has(f.name));
+  newFiles.forEach(file => {
     loadedFiles.add(file.name);
     addChip(file.name, 'loading');
-    uploadReplay(file);
   });
+  // Загружаем все файлы параллельно пачками по 5
+  const chunkSize = 5;
+  async function processChunks() {
+    for (let i = 0; i < newFiles.length; i += chunkSize) {
+      const chunk = newFiles.slice(i, i + chunkSize);
+      await Promise.all(chunk.map(file => uploadReplay(file)));
+    }
+  }
+  processChunks();
 }
-
 async function uploadReplay(file) {
   const formData = new FormData();
   formData.append('file', file);
