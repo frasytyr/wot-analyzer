@@ -196,11 +196,13 @@ def parse_replay():
 @app.route('/parse_many', methods=['POST'])
 def parse_many():
     files = request.files.getlist('files')
+    if not files:
+        return jsonify({'error': 'Файлы не найдены'}), 400
     results = []
     for f in files:
         try:
             b0, b1 = parse_wotreplay(f.read())
-            battle  = extract_battle(b0, b1, f.filename)
+            battle = extract_battle(b0, b1, f.filename)
             results.append({'ok': True, 'battle': battle})
         except Exception as e:
             results.append({'ok': False, 'error': str(e), 'file': f.filename})
