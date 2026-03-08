@@ -309,30 +309,36 @@ fileInput.addEventListener('change', () => { handleFiles(fileInput.files); fileI
 
 function handleFiles(files) {
   const newFiles = [...files].filter(f => !loadedFiles.has(f.name));
+  if (!newFiles.length) return;
   newFiles.forEach(file => {
     loadedFiles.add(file.name);
     addChip(file.name, 'loading');
   });
-  processChunks(newFiles);
+  uploadAll(newFiles);
 }
-async function uploadReplay(file) {
+
+async function uploadAll(files) {
   const formData = new FormData();
-  formData.append('file', file);
+  files.forEach(f => formData.append('files', f));
   try {
-    const resp = await fetch('/parse', { method: 'POST', body: formData });
+    const resp = await fetch('/parse_many', { method: 'POST', body: formData });
     const json = await resp.json();
-    if (json.ok && json.battle) {
-      battles.push(json.battle);
-      setChip(file.name, 'ok');
-    } else {
-      setChip(file.name, 'err', json.error || 'Ошибка парсинга');
-      loadedFiles.delete(file.name);
-    }
+    json.results.forEach(r => {
+      if (r.ok && r.battle) {
+        battles.push(r.battle);
+        setChip(r.battle.file, 'ok');
+      } else {
+        setChip(r.file, 'err', r.error || 'Ошибка');
+        loadedFiles.delete(r.file);
+      }
+    });
   } catch(e) {
-    setChip(file.name, 'err', 'Сервер недоступен');
-    loadedFiles.delete(file.name);
+    files.forEach(f => {
+      setChip(f.name, 'err', 'Сервер недоступен');
+      loadedFiles.delete(f.name);
+    });
   }
-  // render НЕ вызываем здесь
+  render();
 }
 
 async function processChunks(newFiles) {
