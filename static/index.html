@@ -336,7 +336,7 @@ async function uploadReplay(file) {
 }
 
 async function processChunks(newFiles) {
-  const chunkSize = 5;
+  const chunkSize = 10;
   for (let i = 0; i < newFiles.length; i += chunkSize) {
     const chunk = newFiles.slice(i, i + chunkSize);
     await Promise.all(chunk.map(file => uploadReplay(file)));
