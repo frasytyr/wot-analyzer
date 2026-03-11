@@ -280,8 +280,8 @@ table.lb tbody tr:hover td { background:rgba(200,168,75,0.04); }
         <th style="width:85px"></th>
         <th onclick="lbSort('avgAssist')">СРЕДНИЙ АСИСТ</th>
         <th style="width:85px"></th>
-        <th onclick="lbSort('avgKills')">СРЕДНЕЕ КИЛОВ</th>
-        <th style="width:85px"></th>
+        <th onclick="lbSort('avgKills')">КИЛЫ</th>
+        <th onclick="lbSort('wei')" style="color:#c8a84b">WEI</th>
         <th onclick="lbSort('wr')">% ПОБЕД</th>
       </tr></thead>
       <tbody id="lbBody"></tbody>
@@ -497,12 +497,12 @@ function renderStats() {
       const e=b.players.find(p=>p.nick===nick); return e?[{...e,win:b.result==='WIN'}]:[];
     });
     const c = entries.length||1;
-    return { player:nick, battles:entries.length,
-      avgDmg:   Math.round(entries.reduce((s,e)=>s+e.dmg,0)/c),
-      avgAssist:Math.round(entries.reduce((s,e)=>s+e.assist,0)/c),
-      avgKills: (entries.reduce((s,e)=>s+e.kills,0)/c).toFixed(2),
-      wr:       Math.round(entries.filter(e=>e.win).length/c*100)
-    };
+    const avgDmg    = Math.round(entries.reduce((s,e)=>s+e.dmg,0)/c);
+    const avgAssist = Math.round(entries.reduce((s,e)=>s+e.assist,0)/c);
+    const avgKills  = (entries.reduce((s,e)=>s+e.kills,0)/c).toFixed(2);
+    const wr        = Math.round(entries.filter(e=>e.win).length/c*100);
+    const wei       = Math.round(avgDmg * 1.0 + avgAssist * 0.5 + parseFloat(avgKills) * 150);
+    return { player:nick, battles:entries.length, avgDmg, avgAssist, avgKills, wr, wei };
   });
 
   players.sort((a,b) => {
@@ -526,7 +526,7 @@ function renderStats() {
       <td class="lb-a">${p.avgAssist.toLocaleString('ru')}</td>
       <td><div class="bw2"><div class="bf bf-a" style="width:${(p.avgAssist/mA*100).toFixed(1)}%"></div></div></td>
       <td class="lb-k">${p.avgKills}</td>
-      <td><div class="bw2"><div class="bf bf-k" style="width:${(+p.avgKills/mK*100).toFixed(1)}%"></div></div></td>
+      <td style="font-family:'Orbitron',sans-serif;font-size:14px;font-weight:700;color:#c8a84b">${p.wei.toLocaleString('ru')}</td>
       <td style="color:#60b070;font-weight:600">${p.wr}%</td>
     </tr>
   `).join('');
